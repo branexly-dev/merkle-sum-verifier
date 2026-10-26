@@ -22,9 +22,9 @@ $$\text{Leaf Hash} = \text{SHA-256}(\text{Account\_UID} \parallel \text{Salt} \p
 
 ### Parent Node Aggregation
 Parent nodes in the liabilities tree aggregate both cryptographic hash commitments and the balance sum:
-$$\text{Parent} = \text{SHA-256}(\text{Left\_Hash} \parallel \text{Right\_Hash} \parallel \text{Sum\_Balance})$$
+$$\text{Parent} = \text{SHA-256}(\min(\text{Left}, \text{Right}) \parallel \max(\text{Left}, \text{Right}))$$
 
-This prevents any operator from secretly omitting liabilities or presenting negative balances to artificially inflate reserve ratios.
+This deterministic ordering ensures an identical root regardless of tree traversal sequence and prevents any operator from omitting liabilities or presenting negative balances.
 
 ---
 
@@ -34,10 +34,21 @@ This prevents any operator from secretly omitting liabilities or presenting nega
 Clone the repository and run the verifier using standard Python 3:
 
 ```bash
-git clone https://github.com/peakvext/merkle-sum-verifier.git
+git clone https://github.com/branexly-dev/merkle-sum-verifier.git
 cd merkle-sum-verifier
 python merkle_sum_verifier.py
 ```
+
+### Self-Test Suite (Verify Mathematical Rejection & Acceptance)
+Run the built-in cryptographic integrity test suite:
+
+```bash
+python merkle_sum_verifier.py --self-test
+```
+This certifies:
+1. **Authentic Proof:** Accurately matches computed root against target root (`PASS`).
+2. **Tampered Leaf:** Detects modified account balance and rejects (`FAILED`).
+3. **Tampered Root:** Detects spoofed Merkle root and rejects (`FAILED`).
 
 ### Verifying Your Individual Proof File
 Download your proof `.json` file from your [PeakVext Portfolio Dashboard](https://peakvext.com/dashboard/) or via the [Trust Center](https://peakvext.com/trust/), then verify:
